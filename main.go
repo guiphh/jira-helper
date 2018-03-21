@@ -2,27 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/guiphh/jira-helper/pkg/jclient"
 )
 
-type Sprint struct {
-	Id   int8   `json: "id"`
-	Name string `json: "name"`
-}
-
-type Issue struct {
-	Key     string `json: "key"`
-	Summary string `json: "summary"`
-}
-
 func issueHandler(w http.ResponseWriter, r *http.Request) {
-	m := make(map[string]Issue)
-
-	m["TAA-1"] = Issue{Key: "TAA-1", Summary: "Summary 1"}
-	m["TAA-2"] = Issue{Key: "TAA-2", Summary: "Summary 2"}
-	m["TAA-3"] = Issue{Key: "TAA-3", Summary: "Summary 3"}
-
 	issueKeys, ok := r.URL.Query()["key"]
 	if !ok || len(issueKeys) < 1 {
 		log.Println("Url Param 'key' is missing ")
@@ -32,7 +19,8 @@ func issueHandler(w http.ResponseWriter, r *http.Request) {
 	key := issueKeys[0]
 	log.Println("key is " + string(key))
 
-	js, err := json.Marshal(m[key])
+	issue := jclient.GetIssue(key)
+	js, err := json.Marshal(issue)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -44,14 +32,17 @@ func issueHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func mainHandler(w http.ResponseWriter, r *http.Request) {
-	issue1 := Issue{Key: "TAA-1", Summary: "Issue 1"}
-	issue2 := Issue{Key: "TAA-2", Summary: "Issue 2"}
+	jclient.Connect("https://server.net", "username", "password")
+	board := "1"
+	sprint, err := jclient.GetCurrentSprint(board)
+	if err != nil {
+		fmt.Println(err)
+	} else {
+		fmt.Println(sprint)
+	}
+	issues := jclient.GetIssuesSprint(sprint.ID)
 
-	var iss []Issue
-	iss = append(iss, issue1)
-	iss = append(iss, issue2)
-
-	js, err := json.Marshal(iss)
+	js, err := json.Marshal(issues)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

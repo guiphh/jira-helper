@@ -8,7 +8,7 @@ import (
 )
 
 // WriteXlsx exports the issues to an excel file
-func WriteXlsx(filename string, issues []jclient.MyIssue) {
+func WriteXlsx(filename string, issues []jclient.Issue) {
 	var file *xlsx.File
 	var sheet *xlsx.Sheet
 	var row *xlsx.Row

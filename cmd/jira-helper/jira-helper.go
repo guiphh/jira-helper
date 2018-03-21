@@ -16,7 +16,7 @@ func main() {
 	} else {
 		fmt.Println(sprintName)
 	}
-	issues := jclient.GetIssuesSprint()
+	issues := jclient.GetIssuesSprint(1)
 
 	excel.WriteXlsx("MyXLSXFile.xlsx", issues)
 }
